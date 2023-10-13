@@ -87,4 +87,26 @@ else
     echo "SSH Disable"
 fi
 ######### SSH
-echo
+echo "<CentOS Script Start>"
+echo ""
+echo "[ U-01 ]"
+ssh_port=`netstat -nltp | grep ":22[ \t]" | grep "LISTEN"`
+telnet_port=`netstat -nltp | grep ":23[ \t]" | grep "LISTEN"`
+if [ "$ssh_port" != "" ]
+then
+    chkssh=`cat $SSH_CONF | egrep -v "^#|^$" | grep "PermitRootLogin" | awk '{print $2}'`
+    if [ ! -f $SSH_CONF ]
+    then
+        echo "sshd_config File is not Exist"
+    elif [ "$chkssh" == "no" ]
+    then
+        ssh_flag=1
+    else
+        echo "PermitRootLogin $chkssh"
+        ssh_flag=0
+    fi
+else
+    ssh_flag=1
+fi
+#########
+######### TELNET
