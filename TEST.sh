@@ -110,4 +110,45 @@ else
 fi
 #########
 ######### TELNET
-if
+if [ "$telnet_port" != "" ]
+then
+    chkpts=`cat $SECURETTY | egrep "^pts"`
+    chkpam=`cat /etc/pam.d/remote | egrep -v "^#|^$" | grep "pam_securetty.so"`
+    if [ "$chkpts" == "" ] && [ "$chkpam" != "" ]
+        then
+            telnet_flag=1
+    else
+        telnet_flag=0
+    fi
+else
+    telnet_flag=1
+fi
+#########
+if [ "$ssh_flag" -eq 1 ] && [ "$telnet_flag" -eq 1 ]
+then
+    echo "U-01: 양호"
+else
+    echo "U-01: 취약"
+fi
+echo ""
+echo ""
+#########
+#########
+echo "[ U-07 ]"
+if [ -f $passwd ]; then
+    ls -l $PASSWD
+    owner=`stat -c '%U' $PASSWD`
+    usr_perm=`stat -c '%a' $PASSWD | awk '{print substr($0,1,1)}'`
+    grp_perm=`stat -c '%a' $PASSWD | awk '{print substr($0,2,1)}'`
+    oth_perm=`stat -c '%a' $PASSWD | awk '{print substr($0,3,1)}'`
+    if [ "$owner" == "root" ] && [ $usr_perm -le 6 ] && [ $grp_perm -le 4 ] && [ $oth_perm -le 4 ]
+    then
+        echo "U-07: 양호"
+    else
+        echo "U-07: 취약"
+    fi
+else
+    echo "$PASSWD is not exist"
+fi
+echo ""
+echo ""
